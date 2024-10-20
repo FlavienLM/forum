@@ -1,0 +1,35 @@
+\sql
+
+\connect root@localhost
+
+use forum;
+
+dotnet ef migrations add InitialCreate
+
+dotnet tool install --global dotnet-ef     
+
+dotnet ef database update
+
+-- Step 1: Drop foreign key constraints
+ALTER TABLE message DROP FOREIGN KEY FK_message_discussion_discussion_id;
+ALTER TABLE user_notification DROP FOREIGN KEY FK_user_notification_friend_request_friend_request_id;
+ALTER TABLE discussion DROP FOREIGN KEY FK_discussion_user_creator_id;
+
+-- Step 2: Drop the tables
+DROP TABLE IF EXISTS message;
+DROP TABLE IF EXISTS user_notification;
+DROP TABLE IF EXISTS friend_message;
+DROP TABLE IF EXISTS friend_request;
+DROP TABLE IF EXISTS discussion;
+DROP TABLE IF EXISTS user;
+
+
+select table_name,column_name from information_schema.columns
+where table_schema = 'forum'
+order by table_name,ordinal_position
+
+SELECT table_name,GROUP_CONCAT(column_name ORDER BY ordinal_position)
+FROM information_schema.columns
+WHERE table_schema = DATABASE()
+GROUP BY table_name
+ORDER BY table_name
